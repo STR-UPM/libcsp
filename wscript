@@ -36,6 +36,10 @@ def options(ctx):
 
     # Set libcsp options
     gr = ctx.add_option_group('libcsp options')
+
+    # Compiler options
+    gr.add_option('--debug', action='store_true', help='Compile in debug mode')
+
     gr.add_option('--includes', default='', help='Add additional include paths, separate with comma')
     gr.add_option('--install-csp', action='store_true', help='Installs CSP headers and lib')
 
@@ -100,8 +104,12 @@ def configure(ctx):
 
     # Setup CFLAGS
     if (len(ctx.stack_path) <= 1) and (len(ctx.env.CFLAGS) == 0):
-        ctx.env.prepend_value('CFLAGS', ["-std=gnu99", "-g", "-Os", "-Wall", "-Wextra", "-Wshadow", "-Wcast-align",
-                                         "-Wwrite-strings", "-Wno-unused-parameter", "-Werror"])
+        if ctx.options.debug:
+            ctx.env.prepend_value('CFLAGS', ["-std=gnu99", "-g", "-O0", "-Wall", "-Wextra", "-Wshadow", "-Wcast-align",
+                                             "-Wwrite-strings", "-Wno-unused-parameter", "-Werror"])
+        else:
+            ctx.env.prepend_value('CFLAGS', ["-std=gnu99", "-O3", "-Wall", "-Wextra", "-Wshadow", "-Wcast-align",
+                                             "-Wwrite-strings", "-Wno-unused-parameter", "-Werror"])
 
     # Setup default include path and any extra defined
     ctx.env.append_unique('INCLUDES_CSP', ['include'] + ctx.options.includes.split(','))
